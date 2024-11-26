@@ -14,7 +14,28 @@ df <- read.csv("Public.csv")
 
 
 # -----------------------------------------------------------------------------
-# Hypothesis 2:
+# Hypothesis 2: Repair costs are highest when planes are struck by large birds during takeoff and landing
+# Filter data for multiple species
+large_bird_data <- df %>%
+  filter(SPECIES %in% c("Unknown bird - large", "Unknown bird - medium", "Unknown bird - small"))
+
+# Calculate mean repair costs by phase of flight and species
+mean_values <- large_bird_data %>%
+  group_by(PHASE_OF_FLIGHT, SPECIES) %>%
+  summarise(mean_cost = mean(COST_REPAIRS, na.rm = TRUE), .groups = "drop")
+
+# Create bar plot with mean repair costs and custom colors for each species
+ggplot(data = large_bird_data, aes(x = PHASE_OF_FLIGHT, y = COST_REPAIRS, fill = SPECIES)) +
+  stat_summary(fun = "mean", geom = "bar") +
+  geom_text(data = mean_values, aes(x = PHASE_OF_FLIGHT, y = mean_cost, 
+                                    label = scales::label_dollar()(mean_cost)), vjust = -0.5) +
+  labs(title = "Repair Costs for Large Birds Struck During Takeoff and Landing", 
+       x = "Phase of Flight", 
+       y = "Repair Costs (USD)") +
+  scale_y_continuous(labels = scales::label_dollar()) +
+  scale_fill_manual(values = c("Unknown bird - large" = "blue", 
+                               "Unknown bird - medium" = "green", 
+                               "Unknown bird - small" = "red"))  # Custom colors for each species
 
 
 # -----------------------------------------------------------------------------
